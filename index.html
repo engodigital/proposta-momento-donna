@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MOMENTO DONNA · Sistema di Crescita</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#09090a;--white:#ffffff;--dim:rgba(255,255,255,0.62);
+  --faint:rgba(255,255,255,0.28);--border:rgba(255,255,255,0.1);
+  --rose:#E8A598;--green:#34d399;--amber:#fbbf24;--red:#ef4444;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--white);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:17px;}
+#deck{position:fixed;inset:0;}
+.slide{position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+  padding:52px 72px;flex-direction:column;}
+.slide.active{display:flex;}
+.r{opacity:0;transform:translateY(18px);transition:opacity .45s ease,transform .45s ease;}
+.r.shown{opacity:1;transform:none;}
+.slide::before{content:'';position:absolute;inset:0;pointer-events:none;}
+#s0::before{background:radial-gradient(ellipse 70% 60% at 50% 45%,rgba(232,165,152,0.12),transparent);}
+#s1::before{background:radial-gradient(ellipse 70% 55% at 30% 40%,rgba(239,68,68,0.08),transparent);}
+#s2::before{background:radial-gradient(ellipse 65% 55% at 25% 40%,rgba(232,165,152,0.07),transparent);}
+#s3::before{background:radial-gradient(ellipse 60% 55% at 70% 30%,rgba(239,68,68,0.07),transparent);}
+#s4::before{background:radial-gradient(ellipse 70% 55% at 30% 50%,rgba(52,211,153,0.07),transparent);}
+#s5::before{background:radial-gradient(ellipse 75% 55% at 50% 50%,rgba(232,165,152,0.07),transparent);}
+#s6::before{background:radial-gradient(ellipse 65% 55% at 50% 45%,rgba(232,165,152,0.09),transparent);}
+#s7::before{background:radial-gradient(ellipse 65% 55% at 50% 50%,rgba(232,165,152,0.07),transparent);}
+#s8::before{background:radial-gradient(ellipse 65% 60% at 50% 50%,rgba(96,165,250,0.08),transparent);}
+#s9::before{background:radial-gradient(ellipse 80% 55% at 50% 50%,rgba(52,211,153,0.08),transparent);}
+#s10::before{background:radial-gradient(ellipse 65% 55% at 50% 45%,rgba(96,165,250,0.09),transparent);}
+#s11::before{background:radial-gradient(ellipse 70% 60% at 50% 45%,rgba(52,211,153,0.08),transparent);}
+#s12::before{background:radial-gradient(ellipse 65% 55% at 50% 50%,rgba(232,165,152,0.09),transparent);}
+
+#progress{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:100;}
+.dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.15);transition:all .3s;cursor:pointer;}
+.dot.active{background:var(--rose);width:22px;border-radius:4px;}
+.nav-btn{position:fixed;bottom:18px;padding:9px 20px;background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:var(--dim);font-size:14px;
+  cursor:pointer;z-index:100;transition:all .2s;font-family:inherit;}
+.nav-btn:hover{color:var(--white);background:rgba(255,255,255,0.1);}
+#btn-prev{left:24px;}#btn-next{right:24px;}
+
+.inner{max-width:980px;width:100%;position:relative;z-index:1;}
+.eyebrow{font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--dim);margin-bottom:16px;}
+h1{font-size:clamp(56px,8vw,100px);font-weight:900;line-height:.9;letter-spacing:-4px;color:var(--white);}
+h2{font-size:clamp(38px,5.5vw,68px);font-weight:900;line-height:.95;letter-spacing:-2px;color:var(--white);}
+.lead{font-size:18px;color:var(--dim);line-height:1.7;margin-top:16px;}
+.g-rose{background:linear-gradient(130deg,#E8A598,#c97a6e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.g-green{background:linear-gradient(130deg,#34d399,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.g-blue{background:linear-gradient(130deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+.quote-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:24px;}
+.quote{padding:18px 20px;border-radius:14px;background:rgba(255,255,255,0.04);border-left:3px solid rgba(232,165,152,0.5);}
+.quote-text{font-size:16px;font-weight:500;color:var(--white);line-height:1.6;font-style:italic;}
+
+.pain-list{display:flex;flex-direction:column;gap:14px;margin-top:24px;}
+.pain{display:flex;align-items:flex-start;gap:18px;padding:20px 22px;border-radius:14px;
+  background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.18);}
+.pain-icon{font-size:26px;flex-shrink:0;line-height:1;}
+.pain-title{font-size:18px;font-weight:700;color:var(--white);line-height:1.4;}
+.pain-sub{font-size:15px;color:var(--dim);margin-top:5px;line-height:1.5;}
+
+.box-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:22px;}
+.sbox{padding:24px;border-radius:16px;border:1px solid;}
+.sbox-icon{font-size:32px;margin-bottom:12px;}
+.sbox-title{font-size:18px;font-weight:800;color:var(--white);margin-bottom:8px;line-height:1.3;}
+.sbox-text{font-size:15px;color:var(--dim);line-height:1.65;}
+
+.inc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px;}
+.inc-item{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;border-radius:12px;
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);}
+.inc-icon{font-size:20px;flex-shrink:0;}
+.inc-title{font-size:17px;font-weight:700;color:var(--white);line-height:1.3;}
+.inc-note{font-size:14px;color:var(--dim);margin-top:3px;}
+.value-callout{margin-top:18px;padding:16px 20px;border-radius:14px;
+  background:rgba(232,165,152,0.07);border:1px solid rgba(232,165,152,0.3);}
+.vc-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#E8A598;margin-bottom:6px;}
+.vc-text{font-size:16px;font-weight:700;color:var(--white);line-height:1.5;}
+.vc-note{font-size:14px;color:var(--dim);margin-top:4px;}
+
+.roi-formula{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:center;gap:12px;margin-top:24px;}
+.roi-step{text-align:center;padding:22px 16px;border-radius:16px;border:1px solid;background:rgba(255,255,255,0.04);}
+.roi-step.s1{border-color:rgba(232,165,152,0.35);background:rgba(232,165,152,0.06);}
+.roi-step.s2{border-color:rgba(96,165,250,0.35);background:rgba(96,165,250,0.06);}
+.roi-step.s3{border-color:rgba(52,211,153,0.35);background:rgba(52,211,153,0.06);}
+.roi-num{font-size:36px;font-weight:900;line-height:1;margin-bottom:6px;}
+.roi-label{font-size:14px;font-weight:600;color:var(--white);margin-bottom:4px;}
+.roi-sub{font-size:13px;color:var(--dim);line-height:1.4;}
+.roi-arrow{font-size:24px;color:var(--faint);text-align:center;}
+.roi-result{margin-top:20px;padding:20px 24px;border-radius:16px;
+  background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.35);text-align:center;}
+.roi-result-num{font-size:48px;font-weight:900;color:#34d399;line-height:1;}
+.roi-result-label{font-size:16px;color:var(--white);font-weight:600;margin-top:6px;}
+.roi-result-note{font-size:14px;color:var(--dim);margin-top:6px;line-height:1.6;}
+
+.bigpc{max-width:520px;margin:24px auto 0;padding:36px 40px;border-radius:24px;
+  background:rgba(232,165,152,0.07);border:2px solid rgba(232,165,152,0.4);text-align:center;}
+.bigpc-label{font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--dim);margin-bottom:10px;}
+.bigpc-name{font-size:20px;font-weight:800;color:var(--white);margin-bottom:24px;line-height:1.3;}
+.bigpc-row{display:flex;justify-content:space-around;gap:20px;flex-wrap:wrap;}
+.bigpc-col{text-align:center;}
+.bigpc-col-label{font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px;}
+.bigpc-price{font-size:58px;font-weight:900;color:var(--white);line-height:1;}
+.bigpc-per{font-size:16px;color:var(--dim);margin-top:4px;}
+
+.pay-timeline{display:flex;flex-direction:column;gap:10px;margin-top:22px;}
+.pay-row{display:flex;align-items:center;gap:20px;padding:16px 20px;border-radius:12px;}
+.pay-row.today{background:rgba(232,165,152,0.08);border:1px solid rgba(232,165,152,0.3);}
+.pay-row.d20{background:rgba(96,165,250,0.07);border:1px solid rgba(96,165,250,0.25);}
+.pay-row.monthly{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);}
+.pay-row.review{background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.25);}
+.pay-row.total{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.3);}
+.pay-day{font-size:13px;font-weight:800;min-width:110px;text-transform:uppercase;letter-spacing:1px;}
+.pay-desc{flex:1;font-size:16px;color:var(--white);font-weight:500;}
+.pay-amt{font-size:20px;font-weight:900;color:var(--white);}
+
+.steps{display:flex;gap:14px;margin-top:24px;flex-wrap:wrap;}
+.step{flex:1;min-width:155px;text-align:center;padding:22px 16px;
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:16px;}
+.step-n{font-size:32px;font-weight:900;color:rgba(52,211,153,0.3);margin-bottom:8px;}
+.step-t{font-size:17px;font-weight:800;color:var(--white);margin-bottom:6px;}
+.step-s{font-size:14px;color:var(--dim);line-height:1.55;}
+
+.note{display:flex;gap:10px;align-items:flex-start;padding:13px 16px;border-radius:10px;
+  font-size:15px;line-height:1.6;margin-top:14px;}
+.note-warn{background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.22);color:#fca5a5;}
+.note-amber{background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.22);color:#fbbf24;}
+.note-info{background:rgba(232,165,152,0.06);border:1px solid rgba(232,165,152,0.2);color:#E8A598;}
+.note-green{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.25);color:#6ee7b7;}
+.note-blue{background:rgba(96,165,250,0.07);border:1px solid rgba(96,165,250,0.25);color:#93c5fd;}
+
+.locked-overlay{
+  position:absolute;inset:0;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  background:rgba(9,9,10,0.78);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:20;transition:opacity .5s ease;
+}
+.locked-overlay.hidden{opacity:0;pointer-events:none;}
+.lock-icon{font-size:52px;margin-bottom:16px;}
+.lock-title{font-size:clamp(24px,3.5vw,42px);font-weight:900;color:var(--white);margin-bottom:8px;
+  letter-spacing:-1.5px;text-align:center;}
+.lock-sub{font-size:17px;color:var(--dim);margin-bottom:32px;text-align:center;
+  max-width:420px;line-height:1.6;}
+.unlock-btn{
+  padding:18px 40px;border-radius:14px;font-size:18px;font-weight:700;
+  background:linear-gradient(135deg,#E8A598,#c97a6e);
+  color:#09090a;border:none;cursor:pointer;font-family:inherit;
+  transition:transform .2s,box-shadow .2s;
+  box-shadow:0 4px 24px rgba(232,165,152,0.35);
+}
+.unlock-btn:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(232,165,152,0.45);}
+
+@media print{
+  html,body{height:auto;overflow:visible !important;background:#09090a !important;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  #deck{position:static;height:auto;}
+  .slide{position:relative !important;display:flex !important;height:100vh;page-break-after:always;break-after:page;}
+  .r{opacity:1 !important;transform:none !important;transition:none !important;}
+  #progress,#btn-prev,#btn-next{display:none !important;}
+  .locked-overlay{display:none !important;}
+}
+@media(max-width:760px){
+  .slide{padding:44px 24px;}
+  h1{font-size:52px;letter-spacing:-3px;}h2{font-size:34px;}
+  .quote-grid,.box-grid,.inc-grid{grid-template-columns:1fr;}
+  .roi-formula{flex-direction:column;}
+  .roi-arrow{transform:rotate(90deg);}
+  .steps,.bigpc-row{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+<div id="deck">
+
+<!-- ══ S0 — COVER ══ -->
+<section class="slide active" id="s0">
+<div class="inner" style="text-align:center;">
+  <div class="r">
+    <div class="eyebrow">Montebelluna · Estetica &amp; Benessere</div>
+    <h1 style="margin:12px 0;"><span class="g-rose">MOMENTO</span><br>DONNA</h1>
+  </div>
+  <div class="r" style="margin-top:14px;">
+    <p class="lead" style="max-width:500px;margin:0 auto;">Il tuo sistema per <strong>riempire l'agenda tutto l'anno</strong> — e far lavorare i tuoi vent'anni di esperienza.</p>
+    <div style="margin-top:30px;font-size:13px;color:var(--dim);letter-spacing:2px;">TOCCA OVUNQUE PER CONTINUARE →</div>
+  </div>
+  <div class="r" style="margin-top:36px;">
+    <img src="https://assets.cdn.filesafe.space/3fFsxRcRvkat1FpJD7Yw/media/69905feb24813c67ab72773f.webp" alt="WEBloom" style="height:32px;opacity:0.55;">
+  </div>
+</div>
+</section>
+
+<!-- ══ S1 — IL PROBLEMA ══ -->
+<section class="slide" id="s1">
+<div class="inner">
+  <div class="r">
+    <div class="eyebrow">Quello che succede oggi</div>
+    <h2>Senza sistema,<br><span style="color:#ef4444;">stai lasciando soldi sul tavolo.</span></h2>
+  </div>
+  <div class="r">
+    <div class="pain-list">
+      <div class="pain">
+        <span class="pain-icon">📵</span>
+        <div>
+          <div class="pain-title">Le clienti cercano un centro estetico a Montebelluna fuori orario — <strong>se non c'è modo di prenotare, vanno dalla concorrenza</strong></div>
+          <div class="pain-sub">Il 67% delle prenotazioni beauty avviene fuori dagli orari di lavoro. Ogni sera senza prenotazione online è un'occasione persa.</div>
+        </div>
+      </div>
+      <div class="pain">
+        <span class="pain-icon">⭐</span>
+        <div>
+          <div class="pain-title">Hai 20 anni di clienti soddisfatte — ma solo 54 recensioni su Google. <strong>Non perché la qualità manchi, ma perché non esiste un sistema che lo chieda al momento giusto.</strong></div>
+          <div class="pain-sub">Ogni cliente soddisfatta vale una recensione. Senza automazione, quel valore rimane invisibile online.</div>
+        </div>
+      </div>
+      <div class="pain">
+        <span class="pain-icon">🗂️</span>
+        <div>
+          <div class="pain-title">Hai un patrimonio enorme: vent'anni di clienti fedeli e trattamenti ripetuti. <strong>Senza un sistema digitale, ogni anno riparti da zero.</strong></div>
+          <div class="pain-sub">I dati clienti non digitalizzati non lavorano per te — nessun email marketing, nessuna promozione mirata, nessuna fidelizzazione sistematica.</div>
+        </div>
+      </div>
+    </div>
+    <div class="note note-green" style="margin-top:16px;">
+      <span>✅</span>
+      <span>Questo problema ha una soluzione. Si implementa in meno di 10 giorni. Continua →</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ S2 — QUELLO CHE CI HAI DETTO ══ -->
+<section class="slide" id="s2">
+<div class="inner">
+  <div class="r">
+    <div class="eyebrow">Quello che ci hai detto</div>
+    <h2>Abbiamo ascoltato.<br><span class="g-rose">Questo è quello che conta.</span></h2>
+  </div>
+  <div class="r">
+    <div class="quote-grid">
+      <div class="quote"><div class="quote-text">🗣️ "Vorrei avere una programmazione più <strong>specifica, costante</strong> — non improvvisata."</div></div>
+      <div class="quote"><div class="quote-text">🗣️ "Ho clienti da vent'anni... se arrivassero anche <strong>una decina di nuove clienti al mese</strong> sarebbe già un ottimo risultato."</div></div>
+      <div class="quote"><div class="quote-text">🗣️ "Voglio <strong>digitalizzare senza rivoluzionare</strong> il metodo di lavoro — procediamo con quello che abbiamo."</div></div>
+      <div class="quote"><div class="quote-text">🗣️ "Inizialmente potrei pensare a <strong>100-200 euro al mese</strong> — se nei primi mesi vedo un buon riscontro, poi ovviamente..."</div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ S3 — LA DIAGNOSI ══ -->
+<section class="slide" id="s3">
+<div class="inner">
+  <div class="r">
+    <div class="eyebrow">La diagnosi</div>
+    <h2>Tre freni.<br><span style="color:var(--dim);">Una sola soluzione.</span></h2>
+  </div>
+  <div class="r">
+    <div class="pain-list">
+      <div class="pain"><span class="pain-icon">💤</span><div><div class="pain-title">Hai traffico Google, una scheda GMB attiva e clienti fedeli — <strong>ma non c'è nessun sistema che converta tutto questo in prenotazioni 24/7</strong></div></div></div>
+      <div class="pain"><span class="pain-icon">⭐</span><div><div class="pain-title">Ogni cliente soddisfatta è una recensione potenziale — <strong>ma senza automazione, non glielo chiedi mai nel momento giusto</strong></div></div></div>
+      <div class="pain"><span class="pain-icon">🗂️</span><div><div class="pain-title">Hai 20 anni di dati clienti — <strong>senza digitalizzarli, non puoi fare email marketing, promozioni mirate né fidelizzazione sistematica</strong></div></div></div>
+    </div>
+    <div class="note note-green" style="margin-top:16px;">
+      <span>💡</span>
+      <span>Il punto di partenza non è costruire qualcosa di nuovo. È <strong>digitalizzare quello che già hai</strong> — senza rivoluzionare niente.</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ S4 — LA SOLUZIONE ══ -->
+<section class="slide" id="s4">
+<div class="inner">
+  <div class="r">
+    <div class="eyebrow">La soluzione</div>
+    <h2>Ordine, visibilità<br><span class="g-green">e sistema.</span></h2>
+  </div>
+  <div class="r">
+    <div class="box-grid">
+      <div class="sbox" style="border-color:rgba(232,165,152,0.35);background:rgba(232,165,152,0.05);">
+        <div class="sbox-icon">🖥️</div>
+        <div class="sbox-title">Piattaforma CRM</div>
+        <div class="sbox-text">Configuriamo il sistema e lo colleghiamo al tuo sito esistente. Contatti, calendario prenotazioni 24/7 ed email marketing da un solo posto. <strong>Inviamo il codice di integrazione direttamente alla tua agenzia web — zero rivoluzione, solo digitalizzazione.</strong></div>
+      </div>
+      <div class="sbox" style="border-color:rgba(52,211,153,0.35);background:rgba(52,211,153,0.05);">
+        <div class="sbox-icon">⭐</div>
+        <div class="sbox-title">Automazione Recensioni</div>
+        <div class="sbox-text">Dopo ogni prenotazione, il sistema invia automaticamente un'<strong>email</strong> con il link alla tua scheda Google. <strong>Da 54 recensioni in 20 anni a 50+ nei prossimi 90 giorni — in modo completamente organico.</strong></div>
+      </div>
+      <div class="sbox" style="border-color:rgba(96,165,250,0.35);background:rgba(96,165,250,0.05);">
+        <div class="sbox-icon">📍</div>
+        <div class="sbox-title">Google Business Profile</div>
+        <div class="sbox-text">Scheda GBP ottimizzata al 100% — servizi, foto, FAQ, orari, categorie corrette. <strong>Rapporto prima/dopo incluso.</strong> Bot che risponde alle recensioni con il tuo tono di voce, in tempo reale.</div>
+      </div>
+    </div>
+    <div class="note note-green" style="margin-top:18px;">
+      <span>⚡</span>
+      <span>Consegniamo tutto in <strong>~10 giorni</strong> da quando riceviamo le tue informazioni. Tu gestisci la piattaforma — noi la configuriamo e ti formiamo.</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ S5 — COSA INCLUDE ══ -->
+<section class="slide" id="s5">
+<div class="inner">
+  <div class="r">
+    <div class="eyebrow">Cosa include il setup</div>
+    <h2>Tutto quello che ti serve<br><span class="g-green">per partire.</span></h2>
+  </div>
+  <div class="r">
+    <div class="inc-grid">
+      <div class="inc-item"><span class="inc-icon">🖥️</span><div><div class="inc-title">Piattaforma configurata con i tuoi dati</div><div class="inc-note">Database clienti (20 anni → digitalizzati) · Pipeline contatti · Email marketing pronto all'uso</div></div></div>
+      <div class="inc-item"><span class="inc-icon">📅</span><div><div class="inc-title">Calendario prenotazioni 24/7</div><div class="inc-note">Integrato con il tuo sito attuale via codice · Le clienti prenotano quando vogliono, tu ricevi la notifica immediata</div></div></div>
+      <div class="inc-item"><span class="inc-icon">⭐</span><div><div class="inc-title">Automazione raccolta recensioni</div><div class="inc-note">Email automatica post-trattamento con link diretto alla scheda Google · 100% organico</div></div></div>
+      <div class="inc-item"><span class="inc-icon">🤖</span><div><div class="inc-title">Bot risposte recensioni Google</div><div class="inc-note">Risponde <strong>solo alle recensioni</strong> Google · Con il tuo tono di voce personalizzato · Autentico, come se fossi tu</div></div></div>
+      <div class="inc-item"><span class="inc-icon">📍</span><div><div class="inc-title">Google Business Profile ottimizzato</div><div class="inc-note">Servizi in evidenza · Foto · FAQ · Categorie corrette · Rapporto prima/dopo</div></div></div>
+      <div class="inc-item"><span class="inc-icon">🎓</span><div><div class="inc-title">Formazione e onboarding</div><div class="inc-note">1 sessione di uso piattaforma · Gestione autonoma dal primo giorno</div></div></div>
+    </div>
+    <div class="value-callout">
+      <div class="vc-label">⭐ Incluso nel setup</div>
+      <div class="vc-text">Codice di integrazione consegnato direttamente alla tua agenzia web</div>
+      <div class="vc-note">Nessuna rivoluzione del sito — aggiungiamo il sistema a quello che hai già</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ S6 — L'INVESTIMENTO · PACCHETTO BASE ══ -->
+<section class="slide" id="s6">
+<div class="inner" style="text-align:center;">
+  <div class="r">
+    <div class="eyebrow">L'investimento · Pacchetto Setup</div>
+    <h2>Piattaforma + Automazioni + GBP<br><span class="g-rose">Tutto operativo in ~10 giorni.</span></h2>
+  </div>
+  <div class="r">
+    <div class="bigpc">
+      <div class="bigpc-label">Pacchetto Setup · Una volta sola</div>
+      <div class="bigpc-name">CRM Dedicato · Prenotazioni 24/7 · Automazione Recensioni · Bot GBP</div>
+      <div class="bigpc-row">
+        <div class="bigpc-col">
+          <div class="bigpc-col-label">Setup unico</div>
+          <div class="bigpc-price">€1.000</div>
+          <div class="bigpc-per"></div>
+        </div>
+        <div class="bigpc-col">
+          <div class="bigpc-col-label">Mantenimento mensile</div>
+          <div class="bigpc-price" style="font-size:48px;color:#E8A598;">€97</div>
+          <div class="bigpc-per">/mese</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:18px;font-size:16px;color:var(--dim);line-height:1.8;">
+      Tu gestisci la piattaforma in autonomia · Formazione inclusa<br>
+      <strong style="color:var(--white);">Consegna in ~10 giorni con tutte le informazioni fornite</strong>
+    </div>
+    <div class="note note-green" style="max-width:600px;margin:14px auto 0;text-align:left;">
+      <span>✅</span>
+      <span>Nessun vincolo contrattuale. <strong>Rinnovo mensile</strong> con 30 giorni di preavviso.</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ S7 — PIANO PAGAMENTI · BASE ══ -->
+<section class="slide" id="s7">
+<div class="inner">
+  <div class="r">
+    <div class="eyebrow">Piano pagamenti · Pacchetto Setup</div>
+    <h2>Nessuna sorpresa.<br><span class="g-green">Tutto chiaro.</span></h2>
+  </div>
+  <div class="r">
+    <div class="pay-timeline">
+      <div class="pay-row today">
+        <div class="pay-day" style="color:#E8A598;">Oggi · Firma</div>
+        <div class="pay-desc">50% del setup · Inizio immediato del lavoro</div>
+        <div class="pay-amt" style="color:#E8A598;">€500 </div>
+      </div>
+      <div class="pay-row d20">
+        <div class="pay-day" style="color:#93c5fd;">Consegna · ~giorno 10</div>
+        <div class="pay-desc">Saldo del setup · <span style="color:#34d399;font-weight:700;">Sistema attivo ✅</span></div>
+        <div class="pay-amt" style="color:#93c5fd;">€500 </div>
+      </div>
+      <div class="pay-row monthly">
+        <div class="pay-day" style="color:var(--dim);">Mese 2+</div>
+        <div class="pay-desc">Mantenimento piattaforma · Gestione autonoma · Senza vincoli</div>
+        <div class="pay-amt">€97 /mese</div>
+      </div>
+      <div class="pay-row total">
+        <div class="pay-day" style="color:#34d399;">Totale setup</div>
+        <div class="pay-desc" style="font-weight:700;">Piattaforma + Automazioni + GBP · Completo e operativo</div>
+        <div class="pay-amt" style="color:#34d399;font-size:24px;">€1.000 </div>
+      </div>
+    </div>
+    <div class="note note-info" style="margin-top:12px;">
+      <span>💡</span>
+      <span>Il mantenimento (€97/mese) copre la licenza della piattaforma, supporto tecnico e aggiornamenti. Si può disdire in qualsiasi momento con <strong>30 giorni di preavviso</strong>.</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ S8 — MARKETING: SERVIZI (LOCKED) ══ -->
+<section class="slide" id="s8">
+<div class="inner" style="text-align:center;">
+  <div class="r shown">
+    <div class="eyebrow">Offerta 2 · Gestione Marketing Digitale</div>
+    <h2>Acquisizione attiva<br><span class="g-blue">di nuove clienti.</span></h2>
+  </div>
+  <div class="r shown">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px;text-align:left;max-width:780px;margin-left:auto;margin-right:auto;">
+      <div style="padding:22px 24px;border-radius:16px;background:rgba(96,165,250,0.07);border:1px solid rgba(96,165,250,0.3);">
+        <div style="font-size:28px;margin-bottom:10px;">🎣</div>
+        <div style="font-size:17px;font-weight:800;color:var(--white);margin-bottom:6px;">Funnel di acquisizione</div>
+        <div style="font-size:14px;color:var(--dim);line-height:1.6;">Landing page offerta mensile + sequenza email → sistema automatizzato di conversione nuove clienti</div>
+      </div>
+      <div style="padding:22px 24px;border-radius:16px;background:rgba(232,165,152,0.07);border:1px solid rgba(232,165,152,0.3);">
+        <div style="font-size:28px;margin-bottom:10px;">📢</div>
+        <div style="font-size:17px;font-weight:800;color:var(--white);margin-bottom:6px;">Meta Ads gestito</div>
+        <div style="font-size:14px;color:var(--dim);line-height:1.6;">Campagne Facebook/Instagram attive · Ottimizzazione mensile · Budget diretto al tuo account</div>
+      </div>
+      <div style="padding:22px 24px;border-radius:16px;background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.3);">
+        <div style="font-size:28px;margin-bottom:10px;">🔍</div>
+        <div style="font-size:17px;font-weight:800;color:var(--white);margin-bottom:6px;">Google Ads locale</div>
+        <div style="font-size:14px;color:var(--dim);line-height:1.6;">Intercettiamo "centro estetico Montebelluna", "epilazione laser Treviso" e simili (320–1.100 ricerche/mese)</div>
+      </div>
+      <div style="padding:22px 24px;border-radius:16px;background:rgba(167,139,250,0.07);border:1px solid rgba(167,139,250,0.3);">
+        <div style="font-size:28px;margin-bottom:10px;">📊</div>
+        <div style="font-size:17px;font-weight:800;color:var(--white);margin-bottom:6px;">Report KPI mensile</div>
+        <div style="font-size:14px;color:var(--dim);line-height:1.6;">Nuove clienti · Costo per lead · Prenotazioni generate · ROI campagne</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="locked-overlay" id="lock-marketing">
+  <div class="lock-icon">🔒</div>
+  <div class="lock-title">Gestione Marketing Digitale</div>
+  <div class="lock-sub">Funnel · Meta Ads · Google Ads · KPI</div>
+  <button class="unlock-btn" onclick="unlockSlide('lock-marketing')">Vedi Piano Marketing →</button>
+</div>
+</section>
+
+<!-- ══ S9 — MARKETING: ROI ESEMPIO ADS ══ -->
+<section class="slide" id="s9">
+<div class="inner">
+  <div class="r">
+    <div class="eyebrow">Vale l'investimento?</div>
+    <h2>Cosa fanno<br><span class="g-rose">€150 in annunci.</span></h2>
+    <p class="lead" style="max-width:560px;">Esempio reale con i prezzi medi di un centro estetico a Montebelluna — solo con epilazione laser, primo mese:</p>
+  </div>
+  <div class="r">
+    <div class="roi-formula">
+      <div class="roi-step s1">
+        <div class="roi-num" style="color:#E8A598;">€150</div>
+        <div class="roi-label">Meta Ads/mese</div>
+        <div class="roi-sub">diretto al<br>tuo account</div>
+      </div>
+      <div class="roi-arrow">→</div>
+      <div class="roi-step s2">
+        <div class="roi-num" style="color:#93c5fd;">10–15</div>
+        <div class="roi-label">lead epilazione/mese</div>
+        <div class="roi-sub">persone che cercano<br>"epilazione Montebelluna"</div>
+      </div>
+      <div class="roi-arrow">→</div>
+      <div class="roi-step s3">
+        <div class="roi-num" style="color:#34d399;">4–6</div>
+        <div class="roi-label">nuove clienti/mese</div>
+        <div class="roi-sub">che tornano per<br>altri trattamenti</div>
+      </div>
+    </div>
+    <div class="roi-result">
+      <div class="roi-result-num">€400–600</div>
+      <div class="roi-result-label">fatturato aggiuntivo il primo mese — <strong>solo con epilazione laser 💫</strong></div>
+      <div class="roi-result-note">
+        🔢 4–6 clienti × <strong style="color:#E8A598;">€80</strong> (epilazione gambe) = €320–480 · + rinnovi e cross-sell (ceretta, viso, radiofrequenza...)<br>
+        <span style="color:#34d399;font-weight:700;">Il sistema lavora mentre tu lavori: le prenotazioni arrivano anche alle 22:00, il calendario si riempie da solo.</span>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ S10 — MARKETING: PREZZO ══ -->
+<section class="slide" id="s10">
+<div class="inner" style="text-align:center;">
+  <div class="r">
+    <div class="eyebrow">L'investimento · Gestione Marketing</div>
+    <h2>Funnel + Meta Ads<br><span class="g-blue">+ Google Ads</span></h2>
+  </div>
+  <div class="r">
+    <div class="bigpc" style="border-color:rgba(96,165,250,0.4);background:rgba(96,165,250,0.06);">
+      <div class="bigpc-label">Gestione Marketing · Prezzo lancio</div>
+      <div class="bigpc-name">Funnel · Meta Ads · Google Ads · Report KPI mensile</div>
+      <div class="bigpc-row">
+        <div class="bigpc-col">
+          <div class="bigpc-col-label">Setup unico</div>
+          <div class="bigpc-price">€1.500</div>
+          <div class="bigpc-per"></div>
+        </div>
+        <div class="bigpc-col">
+          <div class="bigpc-col-label">Gestione mensile</div>
+          <div class="bigpc-price" style="color:#60a5fa;">€300</div>
+          <div class="bigpc-per">/mese</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:18px;font-size:16px;color:var(--dim);line-height:1.8;">
+      Budget Meta Ads / Google Ads <strong style="color:var(--white);">diretto al tuo account</strong> — tu controlli la spesa pubblicitaria
+    </div>
+    <div class="note note-amber" style="max-width:600px;margin:14px auto 0;text-align:left;">
+      <span>⏰</span>
+      <span>Prezzo lancio valido per i primi <strong>3 mesi</strong> — poi rivediamo insieme in base ai risultati ottenuti</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ S11 — MARKETING: PIANO PAGAMENTI ══ -->
+<section class="slide" id="s11">
+<div class="inner">
+  <div class="r">
+    <div class="eyebrow">Piano pagamenti · Gestione Marketing</div>
+    <h2>Nessuna sorpresa.<br><span class="g-blue">Tutto chiaro.</span></h2>
+  </div>
+  <div class="r">
+    <div class="pay-timeline">
+      <div class="pay-row today">
+        <div class="pay-day" style="color:#E8A598;">Oggi · Firma</div>
+        <div class="pay-desc">50% del setup · Inizio immediato</div>
+        <div class="pay-amt" style="color:#E8A598;">€750 </div>
+      </div>
+      <div class="pay-row d20">
+        <div class="pay-day" style="color:#93c5fd;">Consegna</div>
+        <div class="pay-desc">Saldo setup · <span style="color:#34d399;font-weight:700;">Funnel attivo · Annunci accesi 🟢</span></div>
+        <div class="pay-amt" style="color:#93c5fd;">€750 </div>
+      </div>
+      <div class="pay-row monthly">
+        <div class="pay-day" style="color:var(--dim);">Mese 2 → 4</div>
+        <div class="pay-desc">Gestione mensile · Ottimizzazione continua · Report KPI</div>
+        <div class="pay-amt">€300 /mese</div>
+      </div>
+      <div class="pay-row review">
+        <div class="pay-day" style="color:#fbbf24;">Dopo il mese 4</div>
+        <div class="pay-desc" style="font-weight:600;">Rivediamo insieme in base ai risultati ottenuti</div>
+        <div class="pay-amt" style="color:#fbbf24;">A definire</div>
+      </div>
+      <div class="pay-row total">
+        <div class="pay-day" style="color:#34d399;">Totale setup</div>
+        <div class="pay-desc" style="font-weight:700;">Funnel + Ads + KPI · Completo e operativo</div>
+        <div class="pay-amt" style="color:#34d399;font-size:24px;">€1.500 </div>
+      </div>
+    </div>
+    <div class="note note-blue" style="margin-top:12px;">
+      <span>📢</span>
+      <span>Budget ads (consigliato <strong>€150–300/mese</strong>) va <strong>diretto al tuo account</strong> — tu controlli la spesa pubblicitaria</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ S12 — CTA ══ -->
+<section class="slide" id="s12">
+<div class="inner" style="text-align:center;">
+  <div class="r">
+    <div class="eyebrow">Prossimi passi</div>
+    <h1>Ha senso<br><span class="g-green">per te?</span></h1>
+    <p class="lead" style="max-width:500px;margin:0 auto;">Con vent'anni di clienti fedeli hai già il carburante. <strong>Adesso costruiamo il motore.</strong></p>
+  </div>
+  <div class="r">
+    <div class="steps">
+      <div class="step"><div class="step-n">1</div><div class="step-t">Oggi stesso</div><div class="step-s">Email + IBAN · Questa sera o domani riceverai il contratto 📄</div></div>
+      <div class="step"><div class="step-n">2</div><div class="step-t">Dopo la firma</div><div class="step-s">Questionario onboarding + appuntamento di briefing completo 📋</div></div>
+      <div class="step"><div class="step-n">3</div><div class="step-t">Inizio</div><div class="step-s">€500 anticipo · Setup inizia · Codice integrazione per l'agenzia web 🚀</div></div>
+      <div class="step"><div class="step-n">~10</div><div class="step-t">Go Live</div><div class="step-s">€500 saldo · <span style="color:#34d399;font-weight:700;">Piattaforma attiva ✅</span></div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+</div>
+
+<div id="progress">
+  <div class="dot active" onclick="goTo(0)"></div>
+  <div class="dot" onclick="goTo(1)"></div>
+  <div class="dot" onclick="goTo(2)"></div>
+  <div class="dot" onclick="goTo(3)"></div>
+  <div class="dot" onclick="goTo(4)"></div>
+  <div class="dot" onclick="goTo(5)"></div>
+  <div class="dot" onclick="goTo(6)"></div>
+  <div class="dot" onclick="goTo(7)"></div>
+  <div class="dot" onclick="goTo(8)"></div>
+  <div class="dot" onclick="goTo(9)"></div>
+  <div class="dot" onclick="goTo(10)"></div>
+  <div class="dot" onclick="goTo(11)"></div>
+  <div class="dot" onclick="goTo(12)"></div>
+</div>
+<button class="nav-btn" id="btn-prev" onclick="prev()">← Indietro</button>
+<button class="nav-btn" id="btn-next" onclick="next()">Avanti →</button>
+
+<script>
+const slides=Array.from(document.querySelectorAll('.slide'));
+const dots=Array.from(document.querySelectorAll('#progress .dot'));
+let si=0;
+let marketingUnlocked=false;
+const MKT_LOCK=8;
+const MKT_END=11;
+const CTA=12;
+function updateDots(){
+  dots.forEach((d,i)=>d.classList.toggle('active',i===si));
+  document.getElementById('btn-prev').style.opacity=si===0?'0.3':'1';
+  document.getElementById('btn-next').style.opacity=si===slides.length-1?'0.3':'1';
+}
+function showSlide(n){
+  slides[si].classList.remove('active');
+  si=Math.max(0,Math.min(n,slides.length-1));
+  slides[si].classList.add('active');
+  updateDots();
+}
+function next(){
+  const p=slides[si].querySelectorAll('.r:not(.shown)');
+  if(p.length>0){p[0].classList.add('shown');}
+  else if(si<slides.length-1){
+    let target=si+1;
+    if(si===MKT_LOCK&&!marketingUnlocked) target=CTA;
+    else if(!marketingUnlocked&&target>MKT_LOCK&&target<=MKT_END) target=CTA;
+    showSlide(target);
+  }
+}
+function prev(){
+  const s=slides[si].querySelectorAll('.r.shown');
+  if(s.length>0){s[s.length-1].classList.remove('shown');}
+  else if(si>0){
+    let target=si-1;
+    if(!marketingUnlocked&&target>=MKT_LOCK&&target<=MKT_END) target=MKT_LOCK-1;
+    showSlide(target);
+    slides[target].querySelectorAll('.r').forEach(e=>e.classList.add('shown'));
+  }
+}
+function goTo(n){showSlide(n);slides[n].querySelectorAll('.r').forEach(e=>e.classList.add('shown'));}
+function unlockSlide(overlayId){
+  event.stopPropagation();
+  document.getElementById(overlayId).classList.add('hidden');
+  marketingUnlocked=true;
+}
+document.addEventListener('click',e=>{if(!e.target.closest('button')&&!e.target.closest('#progress'))next();});
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();next();}
+  else if(e.key==='ArrowLeft'){e.preventDefault();prev();}
+});
+let tx=0;
+document.addEventListener('touchstart',e=>tx=e.changedTouches[0].screenX,{passive:true});
+document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].screenX-tx;if(Math.abs(dx)>50){if(dx<0)next();else prev();}},{passive:true});
+updateDots();
+</script>
+</body>
+</html>
