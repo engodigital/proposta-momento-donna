@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MOMENTO DONNA · Sistema di Crescita</title>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
@@ -11,13 +11,21 @@
   --faint:rgba(255,255,255,0.28);--border:rgba(255,255,255,0.1);
   --rose:#E8A598;--green:#34d399;--amber:#fbbf24;--red:#ef4444;
 }
-html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--white);
+html,body{background:var(--bg);color:var(--white);
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:17px;}
-#deck{position:fixed;inset:0;}
-.slide{position:absolute;inset:0;display:none;align-items:center;justify-content:center;
-  padding:52px 72px;flex-direction:column;}
-.slide.active{display:flex;}
-.r{opacity:0;transform:translateY(18px);transition:opacity .45s ease,transform .45s ease;}
+
+.slide{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+  padding:80px 72px;
+  flex-direction:column;
+}
+.slide.mkt-locked{display:none;}
+
+.r{opacity:0;transform:translateY(18px);transition:opacity .55s ease,transform .55s ease;}
 .r.shown{opacity:1;transform:none;}
 .slide::before{content:'';position:absolute;inset:0;pointer-events:none;}
 #s0::before{background:radial-gradient(ellipse 70% 60% at 50% 45%,rgba(232,165,152,0.12),transparent);}
@@ -33,15 +41,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--white);
 #s10::before{background:radial-gradient(ellipse 65% 55% at 50% 45%,rgba(96,165,250,0.09),transparent);}
 #s11::before{background:radial-gradient(ellipse 70% 60% at 50% 45%,rgba(52,211,153,0.08),transparent);}
 #s12::before{background:radial-gradient(ellipse 65% 55% at 50% 50%,rgba(232,165,152,0.09),transparent);}
-
-#progress{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:100;}
-.dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.15);transition:all .3s;cursor:pointer;}
-.dot.active{background:var(--rose);width:22px;border-radius:4px;}
-.nav-btn{position:fixed;bottom:18px;padding:9px 20px;background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:var(--dim);font-size:14px;
-  cursor:pointer;z-index:100;transition:all .2s;font-family:inherit;}
-.nav-btn:hover{color:var(--white);background:rgba(255,255,255,0.1);}
-#btn-prev{left:24px;}#btn-next{right:24px;}
 
 .inner{max-width:980px;width:100%;position:relative;z-index:1;}
 .eyebrow{font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--dim);margin-bottom:16px;}
@@ -154,22 +153,20 @@ h2{font-size:clamp(38px,5.5vw,68px);font-weight:900;line-height:.95;letter-spaci
 }
 .unlock-btn:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(232,165,152,0.45);}
 
-@media print{
-  html,body{height:auto;overflow:visible !important;background:#09090a !important;
-    -webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  #deck{position:static;height:auto;}
-  .slide{position:relative !important;display:flex !important;height:100vh;page-break-after:always;break-after:page;}
-  .r{opacity:1 !important;transform:none !important;transition:none !important;}
-  #progress,#btn-prev,#btn-next{display:none !important;}
-  .locked-overlay{display:none !important;}
+.section-divider{
+  width:100%;max-width:980px;margin:0 auto;
+  border:none;border-top:1px solid rgba(255,255,255,0.06);
 }
+
+@media print{
+  .slide{page-break-after:always;break-after:page;}
+  .r{opacity:1 !important;transform:none !important;}
+  .locked-overlay{display:none !important;}
+  .slide.mkt-locked{display:flex !important;}
+}
+
 @media(max-width:760px){
-  .slide{
-    padding:48px 20px 92px;
-    overflow-y:auto;
-    -webkit-overflow-scrolling:touch;
-    align-items:flex-start;
-  }
+  .slide{padding:64px 20px;}
   h1{font-size:40px;letter-spacing:-2px;}
   h2{font-size:26px;letter-spacing:-1px;line-height:1.05;}
   .lead{font-size:15px;margin-top:10px;}
@@ -197,7 +194,7 @@ h2{font-size:clamp(38px,5.5vw,68px);font-weight:900;line-height:.95;letter-spaci
   .pain-title{font-size:14px;}
   .pain-sub{font-size:13px;margin-top:4px;}
 
-  .roi-formula{flex-direction:column;gap:8px;margin-top:16px;}
+  .roi-formula{grid-template-columns:1fr;gap:8px;margin-top:16px;}
   .roi-arrow{transform:rotate(90deg);font-size:18px;}
   .roi-step{padding:14px 12px;}
   .roi-num{font-size:28px;margin-bottom:4px;}
@@ -232,12 +229,6 @@ h2{font-size:clamp(38px,5.5vw,68px);font-weight:900;line-height:.95;letter-spaci
   .vc-text{font-size:14px;}
   .vc-note{font-size:12px;}
 
-  #btn-prev{left:16px;padding:8px 14px;font-size:13px;bottom:16px;}
-  #btn-next{right:16px;padding:8px 14px;font-size:13px;bottom:16px;}
-  #progress{bottom:20px;gap:5px;}
-  .dot{width:6px;height:6px;}
-  .dot.active{width:18px;}
-
   .lock-title{font-size:clamp(20px,5vw,34px);}
   .lock-sub{font-size:15px;}
   .unlock-btn{padding:15px 28px;font-size:16px;}
@@ -245,10 +236,9 @@ h2{font-size:clamp(38px,5.5vw,68px);font-weight:900;line-height:.95;letter-spaci
 </style>
 </head>
 <body>
-<div id="deck">
 
 <!-- ══ S0 — COVER ══ -->
-<section class="slide active" id="s0">
+<section class="slide" id="s0">
 <div class="inner" style="text-align:center;">
   <div class="r">
     <div class="eyebrow">Montebelluna · Estetica &amp; Benessere</div>
@@ -256,13 +246,15 @@ h2{font-size:clamp(38px,5.5vw,68px);font-weight:900;line-height:.95;letter-spaci
   </div>
   <div class="r" style="margin-top:14px;">
     <p class="lead" style="max-width:500px;margin:0 auto;">Il tuo sistema per <strong>riempire l'agenda tutto l'anno</strong> — e far lavorare i tuoi vent'anni di esperienza.</p>
-    <div style="margin-top:30px;font-size:13px;color:var(--dim);letter-spacing:2px;">TOCCA OVUNQUE PER CONTINUARE →</div>
+    <div style="margin-top:30px;font-size:13px;color:var(--dim);letter-spacing:2px;">SCORRI PER CONTINUARE ↓</div>
   </div>
   <div class="r" style="margin-top:36px;">
     <img src="https://assets.cdn.filesafe.space/3fFsxRcRvkat1FpJD7Yw/media/69905feb24813c67ab72773f.webp" alt="WEBloom" style="height:32px;opacity:0.55;">
   </div>
 </div>
 </section>
+
+<hr class="section-divider">
 
 <!-- ══ S1 — IL PROBLEMA ══ -->
 <section class="slide" id="s1">
@@ -297,11 +289,13 @@ h2{font-size:clamp(38px,5.5vw,68px);font-weight:900;line-height:.95;letter-spaci
     </div>
     <div class="note note-green" style="margin-top:16px;">
       <span>✅</span>
-      <span>Questo problema ha una soluzione. Si implementa in meno di 10 giorni. Continua →</span>
+      <span>Questo problema ha una soluzione. Si implementa in meno di 10 giorni. Continua ↓</span>
     </div>
   </div>
 </div>
 </section>
+
+<hr class="section-divider">
 
 <!-- ══ S2 — QUELLO CHE CI HAI DETTO ══ -->
 <section class="slide" id="s2">
@@ -320,6 +314,8 @@ h2{font-size:clamp(38px,5.5vw,68px);font-weight:900;line-height:.95;letter-spaci
   </div>
 </div>
 </section>
+
+<hr class="section-divider">
 
 <!-- ══ S3 — LA DIAGNOSI ══ -->
 <section class="slide" id="s3">
@@ -341,6 +337,8 @@ h2{font-size:clamp(38px,5.5vw,68px);font-weight:900;line-height:.95;letter-spaci
   </div>
 </div>
 </section>
+
+<hr class="section-divider">
 
 <!-- ══ S4 — LA SOLUZIONE ══ -->
 <section class="slide" id="s4">
@@ -375,6 +373,8 @@ h2{font-size:clamp(38px,5.5vw,68px);font-weight:900;line-height:.95;letter-spaci
 </div>
 </section>
 
+<hr class="section-divider">
+
 <!-- ══ S5 — COSA INCLUDE ══ -->
 <section class="slide" id="s5">
 <div class="inner">
@@ -399,6 +399,8 @@ h2{font-size:clamp(38px,5.5vw,68px);font-weight:900;line-height:.95;letter-spaci
   </div>
 </div>
 </section>
+
+<hr class="section-divider">
 
 <!-- ══ S6 — L'INVESTIMENTO · PACCHETTO BASE ══ -->
 <section class="slide" id="s6">
@@ -435,6 +437,8 @@ h2{font-size:clamp(38px,5.5vw,68px);font-weight:900;line-height:.95;letter-spaci
   </div>
 </div>
 </section>
+
+<hr class="section-divider">
 
 <!-- ══ S7 — PIANO PAGAMENTI · BASE ══ -->
 <section class="slide" id="s7">
@@ -474,6 +478,8 @@ h2{font-size:clamp(38px,5.5vw,68px);font-weight:900;line-height:.95;letter-spaci
 </div>
 </section>
 
+<hr class="section-divider">
+
 <!-- ══ S8 — MARKETING: SERVIZI (LOCKED) ══ -->
 <section class="slide" id="s8">
 <div class="inner" style="text-align:center;">
@@ -510,12 +516,14 @@ h2{font-size:clamp(38px,5.5vw,68px);font-weight:900;line-height:.95;letter-spaci
   <div class="lock-icon">🔒</div>
   <div class="lock-title">Gestione Marketing Digitale</div>
   <div class="lock-sub">Funnel · Meta Ads · Google Ads · KPI</div>
-  <button class="unlock-btn" onclick="unlockSlide('lock-marketing')">Vedi Piano Marketing →</button>
+  <button class="unlock-btn" onclick="unlockMarketing()">Vedi Piano Marketing →</button>
 </div>
 </section>
 
+<hr class="section-divider" id="div-s9" style="display:none;">
+
 <!-- ══ S9 — MARKETING: ROI ESEMPIO ADS ══ -->
-<section class="slide" id="s9">
+<section class="slide mkt-locked" id="s9">
 <div class="inner">
   <div class="r">
     <div class="eyebrow">Vale l'investimento?</div>
@@ -554,8 +562,10 @@ h2{font-size:clamp(38px,5.5vw,68px);font-weight:900;line-height:.95;letter-spaci
 </div>
 </section>
 
+<hr class="section-divider mkt-locked" id="div-s10" style="display:none;">
+
 <!-- ══ S10 — MARKETING: PREZZO ══ -->
-<section class="slide" id="s10">
+<section class="slide mkt-locked" id="s10">
 <div class="inner" style="text-align:center;">
   <div class="r">
     <div class="eyebrow">L'investimento · Gestione Marketing</div>
@@ -589,8 +599,10 @@ h2{font-size:clamp(38px,5.5vw,68px);font-weight:900;line-height:.95;letter-spaci
 </div>
 </section>
 
+<hr class="section-divider mkt-locked" id="div-s11" style="display:none;">
+
 <!-- ══ S11 — MARKETING: PIANO PAGAMENTI ══ -->
-<section class="slide" id="s11">
+<section class="slide mkt-locked" id="s11">
 <div class="inner">
   <div class="r">
     <div class="eyebrow">Piano pagamenti · Gestione Marketing</div>
@@ -632,6 +644,8 @@ h2{font-size:clamp(38px,5.5vw,68px);font-weight:900;line-height:.95;letter-spaci
 </div>
 </section>
 
+<hr class="section-divider">
+
 <!-- ══ S12 — CTA ══ -->
 <section class="slide" id="s12">
 <div class="inner" style="text-align:center;">
@@ -651,80 +665,33 @@ h2{font-size:clamp(38px,5.5vw,68px);font-weight:900;line-height:.95;letter-spaci
 </div>
 </section>
 
-</div>
-
-<div id="progress">
-  <div class="dot active" onclick="goTo(0)"></div>
-  <div class="dot" onclick="goTo(1)"></div>
-  <div class="dot" onclick="goTo(2)"></div>
-  <div class="dot" onclick="goTo(3)"></div>
-  <div class="dot" onclick="goTo(4)"></div>
-  <div class="dot" onclick="goTo(5)"></div>
-  <div class="dot" onclick="goTo(6)"></div>
-  <div class="dot" onclick="goTo(7)"></div>
-  <div class="dot" onclick="goTo(8)"></div>
-  <div class="dot" onclick="goTo(9)"></div>
-  <div class="dot" onclick="goTo(10)"></div>
-  <div class="dot" onclick="goTo(11)"></div>
-  <div class="dot" onclick="goTo(12)"></div>
-</div>
-<button class="nav-btn" id="btn-prev" onclick="prev()">← Indietro</button>
-<button class="nav-btn" id="btn-next" onclick="next()">Avanti →</button>
-
 <script>
-const slides=Array.from(document.querySelectorAll('.slide'));
-const dots=Array.from(document.querySelectorAll('#progress .dot'));
-let si=0;
-let marketingUnlocked=false;
-const MKT_LOCK=8;
-const MKT_END=11;
-const CTA=12;
-function updateDots(){
-  dots.forEach((d,i)=>d.classList.toggle('active',i===si));
-  document.getElementById('btn-prev').style.opacity=si===0?'0.3':'1';
-  document.getElementById('btn-next').style.opacity=si===slides.length-1?'0.3':'1';
+// Reveal on scroll
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('shown');
+      observer.unobserve(e.target);
+    }
+  });
+}, {threshold: 0.12, rootMargin:'0px 0px -40px 0px'});
+
+document.querySelectorAll('.r').forEach(el => observer.observe(el));
+
+// Unlock marketing section
+function unlockMarketing() {
+  document.getElementById('lock-marketing').classList.add('hidden');
+  ['s9','s10','s11','div-s9','div-s10','div-s11'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.style.display = id.startsWith('s') ? 'flex' : 'block';
+      el.classList.remove('mkt-locked');
+    }
+  });
+  setTimeout(() => {
+    document.getElementById('s9').scrollIntoView({behavior:'smooth', block:'start'});
+  }, 100);
 }
-function showSlide(n){
-  slides[si].classList.remove('active');
-  si=Math.max(0,Math.min(n,slides.length-1));
-  slides[si].classList.add('active');
-  updateDots();
-}
-function next(){
-  const p=slides[si].querySelectorAll('.r:not(.shown)');
-  if(p.length>0){p[0].classList.add('shown');}
-  else if(si<slides.length-1){
-    let target=si+1;
-    if(si===MKT_LOCK&&!marketingUnlocked) target=CTA;
-    else if(!marketingUnlocked&&target>MKT_LOCK&&target<=MKT_END) target=CTA;
-    showSlide(target);
-  }
-}
-function prev(){
-  const s=slides[si].querySelectorAll('.r.shown');
-  if(s.length>0){s[s.length-1].classList.remove('shown');}
-  else if(si>0){
-    let target=si-1;
-    if(!marketingUnlocked&&target>=MKT_LOCK&&target<=MKT_END) target=MKT_LOCK-1;
-    showSlide(target);
-    slides[target].querySelectorAll('.r').forEach(e=>e.classList.add('shown'));
-  }
-}
-function goTo(n){showSlide(n);slides[n].querySelectorAll('.r').forEach(e=>e.classList.add('shown'));}
-function unlockSlide(overlayId){
-  event.stopPropagation();
-  document.getElementById(overlayId).classList.add('hidden');
-  marketingUnlocked=true;
-}
-document.addEventListener('click',e=>{if(!e.target.closest('button')&&!e.target.closest('#progress'))next();});
-document.addEventListener('keydown',e=>{
-  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();next();}
-  else if(e.key==='ArrowLeft'){e.preventDefault();prev();}
-});
-let tx=0;
-document.addEventListener('touchstart',e=>tx=e.changedTouches[0].screenX,{passive:true});
-document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].screenX-tx;if(Math.abs(dx)>50){if(dx<0)next();else prev();}},{passive:true});
-updateDots();
 </script>
 </body>
 </html>
